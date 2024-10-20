@@ -122,9 +122,7 @@ final class Injector {
             if FileManager.default.fileExists(atPath: unityFrameworkURL.path) {
                 return unityFrameworkURL
             } else {
-                throw NSError(domain: kTrollFoolsErrorDomain, code: 2, userInfo: [
-                    NSLocalizedDescriptionKey: NSLocalizedString("No eligible framework found and UnityFramework is missing.", comment: ""),
-                ])
+                fatalError("No eligible framework found and UnityFramework is missing.")
             }
         }
     }()
