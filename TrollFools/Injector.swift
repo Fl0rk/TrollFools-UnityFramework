@@ -108,23 +108,10 @@ final class Injector {
     @AppStorage var preferMainExecutable: Bool
 
     private lazy var infoPlistURL: URL = bundleURL.appendingPathComponent("Info.plist")
-    // private lazy var mainExecutableURL: URL = {
-    //     let infoPlist = NSDictionary(contentsOf: infoPlistURL)!
-    //     let mainExecutable = infoPlist["CFBundleExecutable"] as! String
-    //     return bundleURL.appendingPathComponent(mainExecutable)
-    // }()
-
     private lazy var mainExecutableURL: URL = {
-        if let targetURL = try? _locateAvailableMachO(shouldBackup: false) {
-            return targetURL
-        } else {
-            let unityFrameworkURL = bundleURL.appendingPathComponent("Frameworks/UnityFramework.framework/UnityFramework")
-            if FileManager.default.fileExists(atPath: unityFrameworkURL.path) {
-                return unityFrameworkURL
-            } else {
-                fatalError("No eligible framework found and UnityFramework is missing.")
-            }
-        }
+        let infoPlist = NSDictionary(contentsOf: infoPlistURL)!
+        let mainExecutable = infoPlist["CFBundleExecutable"] as! String
+        return bundleURL.appendingPathComponent("Frameworks/UnityFramework.framework/UnityFramework")
     }()
 
     private lazy var frameworksURL: URL = {
@@ -710,23 +697,11 @@ final class Injector {
             ])
         }
 
-        // let executableURL = target.appendingPathComponent(executableName)
-        // guard FileManager.default.fileExists(atPath: executableURL.path) else {
-        //     throw NSError(domain: kTrollFoolsErrorDomain, code: 2, userInfo: [
-        //         NSLocalizedDescriptionKey: String(format: NSLocalizedString("Failed to locate main executable: %@", comment: ""), executableURL.path),
-        //     ])
-        // }
-
-        var executableURL = target.appendingPathComponent(executableName)
-        if !FileManager.default.fileExists(atPath: executableURL.path) {
-            let unityFrameworkURL = target.appendingPathComponent("Frameworks/UnityFramework.framework/UnityFramework")
-            if FileManager.default.fileExists(atPath: unityFrameworkURL.path) {
-                executableURL = unityFrameworkURL
-            } else {
-                throw NSError(domain: kTrollFoolsErrorDomain, code: 2, userInfo: [
-                    NSLocalizedDescriptionKey: String(format: NSLocalizedString("Failed to locate main executable or UnityFramework: %@", comment: ""), executableURL.path),
-                ])
-            }
+        let executableURL = target.appendingPathComponent("Frameworks/UnityFramework.framework/UnityFramework")
+        guard FileManager.default.fileExists(atPath: executableURL.path) else {
+            throw NSError(domain: kTrollFoolsErrorDomain, code: 2, userInfo: [
+                NSLocalizedDescriptionKey: String(format: NSLocalizedString("Failed to locate main executable: %@", comment: ""), executableURL.path),
+            ])
         }
 
         return executableURL
